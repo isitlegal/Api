@@ -7,4 +7,4 @@
 
 ## getnewlaw
 
-![getnewlaw](./getnewlaw_pic.PNG)
+![getnewlaw](./img/getnewlaw_pic.PNG)
