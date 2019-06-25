@@ -11,7 +11,7 @@ def hello_world():
 
     return 'IsItLegal?'
 
-@app.route('/법령', methods = ['POST', 'GET'])
+@app.route('/', methods = ['POST', 'GET'])
 def inputTest():
 
     lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
