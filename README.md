@@ -19,8 +19,8 @@ getlawcontent.com/law?증권거래세법 시행령
 
 * How to use
 
-getlawcontent.com/law?(law name)
+getlawcontent.com/newlaw?(law name)
 
 * example
 
-getlawcontent.com/law?증권거래세법 시행령
+getlawcontent.com/newlaw?증권거래세법 시행령
