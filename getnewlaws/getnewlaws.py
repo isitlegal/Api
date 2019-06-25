@@ -13,7 +13,7 @@ def hello_world():
 
     return 'IsItLegal?'
 
-@app.route('/신규법령', methods = ['POST', 'GET'])
+@app.route('/newlaw', methods = ['POST', 'GET'])
 def inputTest():
     date = request.query_string.decode('utf-8')
     url = 'http://www.law.go.kr/calendarInfoP.do?calDt=' + date
