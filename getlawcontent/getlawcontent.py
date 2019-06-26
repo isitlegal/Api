@@ -1,8 +1,11 @@
 # -*- coding:utf-8 -*-
 
-from flask import Flask, request
+from flask import Flask, request, make_response
 from urllib.parse import unquote, quote_plus
 from selenium import webdriver
+import json
+from collections import OrderedDict
+
 
 app = Flask(__name__)
 
@@ -11,7 +14,7 @@ def hello_world():
 
     return 'IsItLegal?'
 
-@app.route('/', methods = ['POST', 'GET'])
+@app.route('/법령', methods = ['POST', 'GET'])
 def inputTest():
 
     lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
@@ -28,23 +31,40 @@ def inputTest():
     driver.get(url)
     driver.switch_to.frame(framename)
     driver.implicitly_wait(delay)
-    printlaw(url, lawname, driver)
-    html = driver.page_source
+    lawcontent = printlaw(driver, "pgroup")
+
+    action = driver.find_element_by_id('lsRvsDocInfo')
+    action.click()
+    printlaw(driver, "sbj02")
+    change = printlaw(driver, "pgroup").split("<법제처 제공>")
     driver.quit()
 
-    return html
+    json_data = OrderedDict()
+    json_data["name"] = lawname
+    json_data["content"] = lawcontent
+    json_data["changereason"] = change[0]
+    json_data["change"] = change[1]
 
-def printlaw(url, lawname, driver):
+    with open(lawname + ".json", "w", encoding="utf-8") as make_json:
+        json.dump(json_data, make_json, ensure_ascii=False, indent="\t")
 
-    elements = driver.find_elements_by_class_name("pgroup")
+    return make_response(json.dumps(json_data, ensure_ascii=False))
 
-    print(url, end='\n\n')
-    print(lawname)
+def printlaw(driver, search):
+
+    elements = driver.find_elements_by_class_name(search)
+
+    t = ''
+
     for element in elements:
         text = element.text
-        if text[1] == '제' or text[2] == '부':
-            print()
-        print(text)
+        try:
+            if text[1] == '제' or text[2] == '부':
+                t += '\n\n'
+            t += text + '\n'
+        except:
+            pass
+    return t
 
 if __name__ == '__main__':
     Flask.run(app)
