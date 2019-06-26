@@ -45,9 +45,6 @@ def inputTest():
     json_data["changereason"] = change[0]
     json_data["change"] = change[1]
 
-    with open(lawname + ".json", "w", encoding="utf-8") as make_json:
-        json.dump(json_data, make_json, ensure_ascii=False, indent="\t")
-
     return make_response(json.dumps(json_data, ensure_ascii=False))
 
 def printlaw(driver, search):
