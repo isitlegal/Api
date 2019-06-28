@@ -13,7 +13,7 @@ def hello_world():
     return 'IsItLegal?'
 
 @app.route('/newlaw', methods = ['POST', 'GET'])
-def inputTest():
+def getnewlaws():
     date = request.query_string.decode('utf-8')
     url = 'http://www.law.go.kr/calendarInfoP.do?calDt=' + date
 
@@ -30,26 +30,6 @@ def inputTest():
 
     json_data = OrderedDict()
     json_data["data"] = []
-    # json_data["Si"] = {}
-    # json_data["Gong"] = {}
-    # json_data["Abo"] = {}
-    # json_data["Han"] = {}
-    # json_data["Jo"] = {}
-    # json_data["Voc"] = {}
-    #
-    # Si = cleantext(driver.find_element_by_id('Si_tab').text)
-    # json_data = makejson(json_data, "Si", Si)
-    # Gong = cleantext(driver.find_element_by_id('Gong_tab').text)
-    # json_data = makejson(json_data, "Gong", Gong)
-    # Abo = cleantext(driver.find_element_by_id('Abo_tab').text)
-    # json_data = makejson(json_data, "Abo", Abo)
-    # Han = cleantext(driver.find_element_by_id('Han_tab').text)
-    # json_data = makejson(json_data, "Han", Han)
-    # Jo = cleantext(driver.find_element_by_id('Jo_tab').text)
-    # json_data = makejson(json_data, "Jo", Jo)
-    # Voc = cleantext(driver.find_element_by_id('Voc_tab').text)
-    # json_data = makejson(json_data, "Voc", Voc)
-
     json_data["data"].append({"분류": "시행법령"})
     appendlaw(json_data, cleantext(driver.find_element_by_id('Si_tab').text))
     json_data["data"].append({"분류": "공포법령"})
@@ -102,14 +82,6 @@ def appendlaw(json, laws):
     for law in laws:
         json["data"].append(law)
     return json
-
-# def makejson(json_data, name, data):
-#     json_data[name]["법령명"] = data[0]
-#     json_data[name]["구분"] = data[1]
-#     json_data[name]["공포번호"] = data[2]
-#     json_data[name]["소관부처"] = data[3]
-#
-#     return json_data
 
 if __name__ == '__main__':
     Flask.run(app)
