@@ -60,7 +60,7 @@ def cleantext(text):
     department = []
     for law in text:
         law_split = law.split()
-        laws.append(" ".join(law_split[:-3]))
+        laws.append(' '.join(law_split[:-3]))
         kind.append(law_split[-3])
         number.append(law_split[-2])
         department.append(law_split[-1])
