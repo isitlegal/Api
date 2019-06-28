@@ -46,9 +46,6 @@ def getnewlaws():
     html = driver.page_source
     driver.quit()
 
-    with open(date + ".json", "w", encoding="utf-8") as make_json:
-        json.dump(json_data, make_json, ensure_ascii=False, indent="\t")
-
     return make_response(json.dumps(json_data, ensure_ascii=False))
 
 def cleantext(text):
