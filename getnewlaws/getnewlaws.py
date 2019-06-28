@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 
 from flask import Flask, request, make_response
-from urllib.parse import unquote, quote_plus
 from selenium import webdriver
 import json
 from collections import OrderedDict
@@ -19,8 +18,7 @@ def inputTest():
     url = 'http://www.law.go.kr/calendarInfoP.do?calDt=' + date
 
     delay = 3
-    chromedriverDIR = 'chromedriver'
-    law_kinds = ['Si_tab', 'Gong_tab', 'Abo_tab', 'Han_tab', 'Jo_tab', 'Voc_tab']
+    chromedriverDIR = '../chromedriver'
 
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
@@ -31,25 +29,33 @@ def inputTest():
     driver.implicitly_wait(delay)
 
     json_data = OrderedDict()
-    json_data["Si"] = {}
-    json_data["Gong"] = {}
-    json_data["Abo"] = {}
-    json_data["Han"] = {}
-    json_data["Jo"] = {}
-    json_data["Voc"] = {}
+    # json_data["Si"] = {}
+    # json_data["Gong"] = {}
+    # json_data["Abo"] = {}
+    # json_data["Han"] = {}
+    # json_data["Jo"] = {}
+    # json_data["Voc"] = {}
+    #
+    # Si = cleantext(driver.find_element_by_id('Si_tab').text)
+    # json_data = makejson(json_data, "Si", Si)
+    # Gong = cleantext(driver.find_element_by_id('Gong_tab').text)
+    # json_data = makejson(json_data, "Gong", Gong)
+    # Abo = cleantext(driver.find_element_by_id('Abo_tab').text)
+    # json_data = makejson(json_data, "Abo", Abo)
+    # Han = cleantext(driver.find_element_by_id('Han_tab').text)
+    # json_data = makejson(json_data, "Han", Han)
+    # Jo = cleantext(driver.find_element_by_id('Jo_tab').text)
+    # json_data = makejson(json_data, "Jo", Jo)
+    # Voc = cleantext(driver.find_element_by_id('Voc_tab').text)
+    # json_data = makejson(json_data, "Voc", Voc)
 
-    Si = cleantext(driver.find_element_by_id('Si_tab').text)
-    json_data = makejson(json_data, "Si", Si)
-    Gong = cleantext(driver.find_element_by_id('Gong_tab').text)
-    json_data = makejson(json_data, "Gong", Gong)
-    Abo = cleantext(driver.find_element_by_id('Abo_tab').text)
-    json_data = makejson(json_data, "Abo", Abo)
-    Han = cleantext(driver.find_element_by_id('Han_tab').text)
-    json_data = makejson(json_data, "Han", Han)
-    Jo = cleantext(driver.find_element_by_id('Jo_tab').text)
-    json_data = makejson(json_data, "Jo", Jo)
-    Voc = cleantext(driver.find_element_by_id('Voc_tab').text)
-    json_data = makejson(json_data, "Voc", Voc)
+    json_data["Si"] = cleantext(driver.find_element_by_id('Si_tab').text)
+    json_data["Gong"] = cleantext(driver.find_element_by_id('Gong_tab').text)
+    json_data["Abo"] = cleantext(driver.find_element_by_id('Abo_tab').text)
+    json_data["Han"] = cleantext(driver.find_element_by_id('Han_tab').text)
+    json_data["Jo"] = cleantext(driver.find_element_by_id('Jo_tab').text)
+    json_data["Voc"] = cleantext(driver.find_element_by_id('Voc_tab').text)
+
     html = driver.page_source
     driver.quit()
 
@@ -70,17 +76,28 @@ def cleantext(text):
         laws.append(" ".join(law_split[:-3]))
         kind.append(law_split[-3])
         number.append(law_split[-2])
-        department.append(law_split[-1].split(','))
+        department.append(law_split[-1])
 
-    return [laws, kind, number, department]
+    # return [laws, kind, number, department]
 
-def makejson(json_data, name, data):
-    json_data[name]["법령명"] = data[0]
-    json_data[name]["구분"] = data[1]
-    json_data[name]["공포번호"] = data[2]
-    json_data[name]["소관부처"] = data[3]
+    res = []
+    for law in zip(laws, kind, number, department):
+        temp = {}
+        temp["법령명"] = law[0]
+        temp["구분"] = law[1]
+        temp["공포번호"] = law[2]
+        temp["소관부처"] = law[3]
+        res.append(temp)
 
-    return json_data
+    return res
+
+# def makejson(json_data, name, data):
+#     json_data[name]["법령명"] = data[0]
+#     json_data[name]["구분"] = data[1]
+#     json_data[name]["공포번호"] = data[2]
+#     json_data[name]["소관부처"] = data[3]
+#
+#     return json_data
 
 if __name__ == '__main__':
     Flask.run(app)
