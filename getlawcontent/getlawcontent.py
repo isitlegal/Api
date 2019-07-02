@@ -14,14 +14,14 @@ def hello_world():
 
     return 'IsItLegal?'
 
-@app.route('/law', methods = ['POST', 'GET'])
-def inputTest():
+@app.route('/법령', methods = ['POST', 'GET'])
+def 법령():
 
     lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
     url = 'http://www.law.go.kr/' + quote_plus('법령') + '/' + quote_plus(lawname)
     delay = 3
     framename = "lawService"
-    chromedriverDIR = 'chromedriver'
+    chromedriverDIR = '../chromedriver'
 
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
@@ -31,12 +31,13 @@ def inputTest():
     driver.get(url)
     driver.switch_to.frame(framename)
     driver.implicitly_wait(delay)
-    lawcontent = printlaw(driver, "pgroup")
 
+    lawcontent = printlaw(driver, "pgroup")
     action = driver.find_element_by_id('lsRvsDocInfo')
     action.click()
     printlaw(driver, "sbj02")
     change = printlaw(driver, "pgroup").split("<법제처 제공>")
+
     driver.quit()
 
     json_data = OrderedDict()
@@ -44,6 +45,72 @@ def inputTest():
     json_data["content"] = lawcontent
     json_data["changereason"] = change[0]
     json_data["change"] = change[1]
+
+    return make_response(json.dumps(json_data, ensure_ascii=False))
+
+@app.route('/행정규칙', methods = ['POST', 'GET'])
+def 행정규칙():
+
+    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
+    url = 'http://www.law.go.kr/' + quote_plus('행정규칙') + '/' + quote_plus(lawname)
+    delay = 3
+    framename = "lawService"
+    chromedriverDIR = '../chromedriver'
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    options.add_argument("disable-gpu")
+
+    driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
+    driver.get(url)
+    driver.switch_to.frame(framename)
+    driver.implicitly_wait(delay)
+
+    lawcontent = printlaw(driver, "pgroup")
+    action = driver.find_element_by_id('lsRvsDocInfo')
+    action.click()
+    printlaw(driver, "sbj02")
+    change = printlaw(driver, "pgroup")
+
+    driver.quit()
+
+    json_data = OrderedDict()
+    json_data["name"] = lawname
+    json_data["content"] = lawcontent
+    json_data["change"] = change
+
+    return make_response(json.dumps(json_data, ensure_ascii=False))
+
+@app.route('/자치법규', methods = ['POST', 'GET'])
+def 자치법규():
+
+    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
+    url = 'http://www.law.go.kr/' + quote_plus('자치법규') + '/' + quote_plus(lawname)
+    delay = 3
+    framename = "lawService"
+    chromedriverDIR = '../chromedriver'
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    options.add_argument("disable-gpu")
+
+    driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
+    driver.get(url)
+    driver.switch_to.frame(framename)
+    driver.implicitly_wait(delay)
+
+    lawcontent = printlaw(driver, "pgroup")
+    action = driver.find_element_by_id('rvsDoc')
+    action.click()
+    printlaw(driver, "sbj02")
+    change = printlaw(driver, "pgroup")
+
+    driver.quit()
+
+    json_data = OrderedDict()
+    json_data["name"] = lawname
+    json_data["content"] = lawcontent
+    json_data["change"] = change
 
     return make_response(json.dumps(json_data, ensure_ascii=False))
 
