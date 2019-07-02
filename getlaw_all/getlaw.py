@@ -8,6 +8,14 @@ from collections import OrderedDict
 
 app = Flask(__name__)
 
+delay = 3
+framename = "lawService"
+chromedriverDIR = '../chromedriver'
+
+options = webdriver.ChromeOptions()
+options.add_argument('headless')
+options.add_argument("disable-gpu")
+
 @app.route('/')
 def hello_world():
 
@@ -18,13 +26,6 @@ def 법령():
 
     lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
     url = 'http://www.law.go.kr/' + quote_plus('법령') + '/' + quote_plus(lawname)
-    delay = 3
-    framename = "lawService"
-    chromedriverDIR = '../chromedriver'
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('headless')
-    options.add_argument("disable-gpu")
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
     driver.get(url)
@@ -52,13 +53,6 @@ def 행정규칙():
 
     lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
     url = 'http://www.law.go.kr/' + quote_plus('행정규칙') + '/' + quote_plus(lawname)
-    delay = 3
-    framename = "lawService"
-    chromedriverDIR = '../chromedriver'
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('headless')
-    options.add_argument("disable-gpu")
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
     driver.get(url)
@@ -85,13 +79,6 @@ def 자치법규():
 
     lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
     url = 'http://www.law.go.kr/' + quote_plus('자치법규') + '/' + quote_plus(lawname)
-    delay = 3
-    framename = "lawService"
-    chromedriverDIR = '../chromedriver'
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('headless')
-    options.add_argument("disable-gpu")
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
     driver.get(url)
@@ -115,29 +102,21 @@ def 자치법규():
 
 @app.route('/신규법령', methods = ['POST', 'GET'])
 def getnewlaws():
-        date = request.query_string.decode('utf-8')
+    date = request.query_string.decode('utf-8')
     url = 'http://www.law.go.kr/calendarInfoP.do?calDt=' + date
-
-    delay = 3
-    chromedriverDIR = '../chromedriver'
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('headless')
-    options.add_argument("disable-gpu")
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
     driver.get(url)
     driver.implicitly_wait(delay)
 
     json_data = OrderedDict()
-    json_data["Si"] = cleantext(driver.find_element_by_id('Si_tab').text)
-    json_data["Gong"] = cleantext(driver.find_element_by_id('Gong_tab').text)
-    json_data["Abo"] = cleantext(driver.find_element_by_id('Abo_tab').text)
-    json_data["Han"] = cleantext(driver.find_element_by_id('Han_tab').text)
-    json_data["Jo"] = cleantext(driver.find_element_by_id('Jo_tab').text)
-    json_data["Voc"] = cleantext(driver.find_element_by_id('Voc_tab').text)
+    json_data["시행법령"] = cleantext(driver.find_element_by_id('Si_tab').text)
+    json_data["공포법령"] = cleantext(driver.find_element_by_id('Gong_tab').text)
+    json_data["폐지법령"] = cleantext(driver.find_element_by_id('Abo_tab').text)
+    json_data["한시법령"] = cleantext(driver.find_element_by_id('Han_tab').text)
+    json_data["한시조문"] = cleantext(driver.find_element_by_id('Jo_tab').text)
+    json_data["위헌조문"] = cleantext(driver.find_element_by_id('Voc_tab').text)
 
-    html = driver.page_source
     driver.quit()
 
     return make_response(json.dumps(json_data, ensure_ascii=False))
