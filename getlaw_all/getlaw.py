@@ -14,7 +14,7 @@ chromedriverDIR = '../chromedriver'
 
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
-options.add_argument("disable-gpu")
+# options.add_argument("disable-gpu")
 
 @app.route('/')
 def hello_world():
@@ -158,7 +158,7 @@ def 신규법령():
     return make_response(json.dumps(json_data, ensure_ascii=False))
 
 @app.route('/법령체계도', methods = ['POST', 'GET'])
-def getlawtree():
+def 법령체계도():
     lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
     url = 'http://www.law.go.kr/' + quote_plus('법령체계도') + '/' + quote_plus('법령') + '/' + quote_plus(lawname)
 
@@ -178,6 +178,56 @@ def getlawtree():
             json_data["lower"].append(i.text)
         else:
             json_data["upper"].append(i.text)
+
+    return make_response(json.dumps(json_data, ensure_ascii=False))
+
+@app.route('/판례', methods = ['POST', 'GET'])
+def 판례():
+    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:].split(',')[2]
+    url = 'http://www.law.go.kr/' + quote_plus('판례') + '/(' + quote_plus(lawname) + ')'
+    url = "".join(url.split('+'))
+
+    driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
+    driver.get(url)
+    driver.switch_to.frame(framename)
+    driver.implicitly_wait(delay)
+
+    text = driver.find_element_by_class_name("viewwrap").text.split('\n')
+
+    json_data = OrderedDict()
+    json_data["판례명"] = text[0]
+    json_data["판시사함"] = text[3]
+    json_data["판결요지"] = text[5]
+    json_data["참조조문"] = text[7]
+    json_data["참조판례"] = text[9]
+    json_data["전문"] = {}
+    json_data["전문"]["원고, 상고인"] = text[12]
+    json_data["전문"]["피고, 피상고인"] = text[14]
+    json_data["전문"]["원심판결"] = text[16]
+    json_data["전문"]["주문"] = text[18]
+    json_data["전문"]["이유"] = "\n".join(text[20:])
+
+    return make_response(json.dumps(json_data, ensure_ascii=False))
+
+@app.route('/판례목록', methods = ['POST', 'GET'])
+def 판례목록():
+    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
+    url = 'http://www.law.go.kr/unSc.do?tabMenuId=tab77&section=licPrec&query=' + quote_plus(lawname)
+
+    driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
+    driver.get(url)
+    driver.implicitly_wait(delay)
+
+    temp = driver.find_element_by_class_name('result_area').text.split("\n")
+
+    json_data = OrderedDict()
+    json_data["판례목록"] = []
+
+    for t in temp:
+        if t[-1] == "]":
+            json_data["판례목록"].append(t)
+
+    driver.quit()
 
     return make_response(json.dumps(json_data, ensure_ascii=False))
 
@@ -226,3 +276,5 @@ def makejson(json_data, name, data):
 
 if __name__ == '__main__':
     Flask.run(app)
+
+
