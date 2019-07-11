@@ -5,6 +5,7 @@ from urllib.parse import unquote, quote_plus
 from selenium import webdriver
 import json
 from collections import OrderedDict
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -14,7 +15,13 @@ chromedriverDIR = '../chromedriver'
 
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
-# options.add_argument("disable-gpu")
+options.add_argument("disable-gpu")
+
+data = pd.read_csv('법령목록.csv', encoding='euc-kr').values
+laws = []
+
+for d in range(len(data)):
+    laws.append(list(data[d]))
 
 @app.route('/')
 def hello_world():
@@ -228,6 +235,18 @@ def 판례목록():
             json_data["판례목록"].append(t)
 
     driver.quit()
+
+    return make_response(json.dumps(json_data, ensure_ascii=False))
+
+@app.route('/법령목록', methods = ['POST', 'GET'])
+def 법령목록():
+    pagenum = int(unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:])
+    json_data = OrderedDict()
+    start = 20 * (pagenum-1)
+    end = 20 * pagenum
+    if pagenum * 20 > len(laws):
+        end = len(laws) - (20 - len(laws)//20)
+    json_data["법령목록"] = laws[start : end]
 
     return make_response(json.dumps(json_data, ensure_ascii=False))
 
