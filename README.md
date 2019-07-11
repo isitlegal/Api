@@ -1,6 +1,6 @@
 # Isitlegal-Api
 
-![logo](./img/Isitlegal_logo.PNG){: width="250" height="250"}
+![logo](./img/Isitlegal_logo.PNG)
 
 ----
 
