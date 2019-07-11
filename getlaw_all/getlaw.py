@@ -9,7 +9,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-delay = 3
+delay = 0.2
 framename = "lawService"
 chromedriverDIR = '../chromedriver'
 
