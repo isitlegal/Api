@@ -17,12 +17,6 @@ options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument("disable-gpu")
 
-data = pd.read_csv('법령목록.csv', encoding='euc-kr').values
-laws = []
-
-for d in range(len(data)):
-    laws.append(list(data[d]))
-
 @app.route('/')
 def hello_world():
 
@@ -241,12 +235,19 @@ def 판례목록():
 @app.route('/법령목록', methods = ['POST', 'GET'])
 def 법령목록():
     pagenum = int(unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:])
+    driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
+    driver.get('https://github.com/isitlegal/Api/blob/master/getlaw_all/%EB%B2%95%EB%A0%B9%EB%AA%A9%EB%A1%9D.csv')
+    start = (pagenum - 1) * 20 + 2
+    end = start + 19
+
     json_data = OrderedDict()
-    start = 20 * (pagenum-1)
-    end = 20 * pagenum
-    if pagenum * 20 > len(laws):
-        end = len(laws) - (20 - len(laws)//20)
-    json_data["법령목록"] = laws[start : end]
+    json_data["법령목록"] = []
+
+    for law in range(start, end):
+        json_data["법령목록"].append(driver.find_element_by_id('LC' + str(law)).text.split())
+
+    with open('법령목록-page 1.json', 'w') as file:
+        json.dump(json_data, file, ensure_ascii=False, indent='\t')
 
     return make_response(json.dumps(json_data, ensure_ascii=False))
 
@@ -294,6 +295,5 @@ def makejson(json_data, name, data):
     return json_data
 
 if __name__ == '__main__':
+
     Flask.run(app)
-
-
