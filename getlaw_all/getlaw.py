@@ -244,7 +244,10 @@ def 법령목록():
     json_data["법령목록"] = []
 
     for law in range(start, end):
-        json_data["법령목록"].append(driver.find_element_by_id('LC' + str(law)).text.split())
+        temp = driver.find_element_by_id('LC' + str(law)).text.split()
+        temp = temp[0 : 1] + [" ".join(temp[1 : -3])] + temp[-3 : ]
+        print(temp)
+        json_data["법령목록"].append(temp)
 
     with open('법령목록-page 1.json', 'w') as file:
         json.dump(json_data, file, ensure_ascii=False, indent='\t')
