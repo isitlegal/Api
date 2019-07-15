@@ -249,9 +249,6 @@ def 법령목록():
         print(temp)
         json_data["법령목록"].append(temp)
 
-    with open('법령목록-page 1.json', 'w') as file:
-        json.dump(json_data, file, ensure_ascii=False, indent='\t')
-
     return make_response(json.dumps(json_data, ensure_ascii=False))
 
 def cleantext(text):
