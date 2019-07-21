@@ -1,17 +1,16 @@
 # -*- coding:utf-8 -*-
 
 from flask import Flask, request, make_response
-from urllib.parse import unquote, quote_plus
+from urllib.parse import quote_plus
 from selenium import webdriver
 import json
 from collections import OrderedDict
-import pandas as pd
 
 app = Flask(__name__)
 
 delay = 0.2
 framename = "lawService"
-chromedriverDIR = '../chromedriver'
+chromedriverDIR = 'chromedriver'
 
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
@@ -24,8 +23,7 @@ def hello_world():
 
 @app.route('/법령', methods = ['POST', 'GET'])
 def 법령():
-
-    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
+    lawname = request.args.get('lawname')
     url = 'http://www.law.go.kr/' + quote_plus('법령') + '/' + quote_plus(lawname)
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
@@ -47,12 +45,11 @@ def 법령():
     json_data["changereason"] = change[0]
     json_data["change"] = change[1]
 
-    return make_response(json.dumps(json_data, ensure_ascii=False))
+    return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
 @app.route('/행정규칙', methods = ['POST', 'GET'])
 def 행정규칙():
-
-    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
+    lawname = request.args.get('lawname')
     url = 'http://www.law.go.kr/' + quote_plus('행정규칙') + '/' + quote_plus(lawname)
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
@@ -74,7 +71,6 @@ def 행정규칙():
 
     temp = driver.find_elements_by_class_name('cya2nlB')
 
-    # relation = [law.text]
     relation = []
     for i in temp:
         relation.append(i.text)
@@ -88,12 +84,11 @@ def 행정규칙():
     json_data["change"] = change
     json_data["relation"] = relation
 
-    return make_response(json.dumps(json_data, ensure_ascii=False))
+    return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
 @app.route('/자치법규', methods = ['POST', 'GET'])
 def 자치법규():
-
-    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
+    lawname = request.args.get('lawname')
     url = 'http://www.law.go.kr/' + quote_plus('자치법규') + '/' + quote_plus(lawname)
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
@@ -114,19 +109,14 @@ def 자치법규():
     json_data["content"] = lawcontent
     json_data["change"] = change
 
-    return make_response(json.dumps(json_data, ensure_ascii=False))
+    return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
 @app.route('/신규법령', methods = ['POST', 'GET'])
 def 신규법령():
-    date = request.query_string.decode('utf-8')
+    date = request.args.get('date')
     url = 'http://www.law.go.kr/calendarInfoP.do?calDt=' + date
 
-    delay = 3
-    chromedriverDIR = '../chromedriver'
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('headless')
-    options.add_argument("disable-gpu")
+    delay = 1
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
     driver.get(url)
@@ -153,14 +143,13 @@ def 신규법령():
     Voc = cleantext(driver.find_element_by_id('Voc_tab').text)
     json_data = makejson(json_data, "Voc", Voc)
 
-    html = driver.page_source
     driver.quit()
 
-    return make_response(json.dumps(json_data, ensure_ascii=False))
+    return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
 @app.route('/법령체계도', methods = ['POST', 'GET'])
 def 법령체계도():
-    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
+    lawname = request.args.get('lawname')
     url = 'http://www.law.go.kr/' + quote_plus('법령체계도') + '/' + quote_plus('법령') + '/' + quote_plus(lawname)
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
@@ -180,11 +169,11 @@ def 법령체계도():
         else:
             json_data["upper"].append(i.text)
 
-    return make_response(json.dumps(json_data, ensure_ascii=False))
+    return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
 @app.route('/판례', methods = ['POST', 'GET'])
 def 판례():
-    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:].split(',')[2]
+    lawname = request.args.get('lawname').split(',')[2]
     url = 'http://www.law.go.kr/' + quote_plus('판례') + '/(' + quote_plus(lawname) + ')'
     url = "".join(url.split('+'))
 
@@ -202,17 +191,17 @@ def 판례():
     json_data["참조조문"] = text[7]
     json_data["참조판례"] = text[9]
     json_data["전문"] = {}
-    json_data["전문"]["원고, 상고인"] = text[12]
-    json_data["전문"]["피고, 피상고인"] = text[14]
-    json_data["전문"]["원심판결"] = text[16]
-    json_data["전문"]["주문"] = text[18]
-    json_data["전문"]["이유"] = "\n".join(text[20:])
+    json_data["전문"]["원고, 상고인"] = text[13]
+    json_data["전문"]["피고, 피상고인"] = text[15]
+    json_data["전문"]["원심판결"] = text[17]
+    json_data["전문"]["주문"] = text[19]
+    json_data["전문"]["이유"] = "\n".join(text[21:])
 
-    return make_response(json.dumps(json_data, ensure_ascii=False))
+    return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
 @app.route('/판례목록', methods = ['POST', 'GET'])
 def 판례목록():
-    lawname = unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:]
+    lawname = request.args.get('lawname')
     url = 'http://www.law.go.kr/unSc.do?tabMenuId=tab77&section=licPrec&query=' + quote_plus(lawname)
 
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
@@ -230,11 +219,11 @@ def 판례목록():
 
     driver.quit()
 
-    return make_response(json.dumps(json_data, ensure_ascii=False))
+    return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
 @app.route('/법령목록', methods = ['POST', 'GET'])
 def 법령목록():
-    pagenum = int(unquote('http://www.law.go.kr/' + request.query_string.decode('utf-8'))[21:])
+    pagenum = int(request.args.get('pagenum'))
     driver = webdriver.Chrome(chromedriverDIR, chrome_options=options)
     driver.get('https://github.com/isitlegal/Api/blob/master/getlaw_all/%EB%B2%95%EB%A0%B9%EB%AA%A9%EB%A1%9D.csv')
     start = (pagenum - 1) * 20 + 2
@@ -245,11 +234,14 @@ def 법령목록():
 
     for law in range(start, end):
         temp = driver.find_element_by_id('LC' + str(law)).text.split()
-        temp = temp[0 : 1] + [" ".join(temp[1 : -3])] + temp[-3 : ]
-        print(temp)
-        json_data["법령목록"].append(temp)
+        dic = {}
+        dic["law_name"] = " ".join(temp[1:-3])
+        dic["departure"] = temp[0]
+        dic["announce_date"] = temp[-3]
+        dic["start_date"] = temp[-2]
+        json_data["법령목록"].append(dic)
 
-    return make_response(json.dumps(json_data, ensure_ascii=False))
+    return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
 def cleantext(text):
     text = text.split('\n')
@@ -296,4 +288,4 @@ def makejson(json_data, name, data):
 
 if __name__ == '__main__':
 
-    Flask.run(app)
+    Flask.run(app, host='0.0.0.0', port=3000)
