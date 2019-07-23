@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 app = Flask(__name__)
 
-delay = 0.2
+delay = 0.4
 framename = "lawService"
 chromedriverDIR = 'chromedriver'
 
@@ -233,13 +233,16 @@ def 법령목록():
     json_data["법령목록"] = []
 
     for law in range(start, end):
-        temp = driver.find_element_by_id('LC' + str(law)).text.split()
-        dic = {}
-        dic["law_name"] = " ".join(temp[1:-3])
-        dic["departure"] = temp[0]
-        dic["announce_date"] = temp[-3]
-        dic["start_date"] = temp[-2]
-        json_data["법령목록"].append(dic)
+        try:
+            temp = driver.find_element_by_id('LC' + str(law)).text.split()
+            dic = {}
+            dic["law_name"] = " ".join(temp[1:-3])
+            dic["departure"] = temp[0]
+            dic["announce_date"] = temp[-3]
+            dic["start_date"] = temp[-2]
+            json_data["법령목록"].append(dic)
+        except:
+            pass
 
     return make_response(json.dumps(json_data, ensure_ascii=False, indent='\t'))
 
@@ -252,7 +255,7 @@ def cleantext(text):
     department = []
     for law in text:
         law_split = law.split()
-        laws.append(" ".join(law_split[:-3]))
+        laws.append(" ".join(law_split[:-4]))
         kind.append(law_split[-3])
         number.append(law_split[-2])
         department.append(law_split[-1])
